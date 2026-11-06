@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>霧峰林家花園阿罩霧歷史穿越 - 4P通路行銷與社區長照教學網頁</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+        .matching-card {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .matching-card.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+        }
+        .matching-card.matched {
+            border-color: #10b981;
+            background-color: #ecfdf5;
+            opacity: 0.85;
+            pointer-events: none;
+        }
+        .matching-card.wrong {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+            animation: shake 0.4s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- 頂部導覽列 Header -->
+    <header class="bg-gradient-to-r from-amber-800 via-stone-800 to-teal-900 text-white shadow-xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300 text-xl">
+                    <i class="fa-solid fa-scroll"></i>
+                </div>
+                <div>
+                    <h1 class="text-base md:text-xl font-bold tracking-wide">阿罩霧歷史穿越與社區實務</h1>
+                    <p class="text-xs text-amber-200 hidden sm:block">霧峰林家花園 4P 通路行銷策略 & 社區資源整合</p>
+                </div>
+            </div>
+            
+            <!-- 學生資訊簡記 & 導覽選單 -->
+            <div class="flex items-center space-x-3">
+                <div id="userInfoHeader" class="hidden text-xs md:text-sm bg-black/30 px-3 py-1.5 rounded-full border border-amber-400/30">
+                    <span id="userHeaderName" class="font-semibold text-amber-300">未登入</span> 
+                    <span id="userHeaderDept" class="text-slate-300 hidden md:inline"></span>
+                </div>
+                <nav class="flex space-x-1 sm:space-x-2">
+                    <button onclick="switchTab('learn')" id="nav-learn" class="px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition bg-amber-600 text-white shadow-sm">
+                        <i class="fa-solid fa-book-open mr-1"></i>知識學習
+                    </button>
+                    <button onclick="switchTab('game')" id="nav-game" class="px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition hover:bg-white/10">
+                        <i class="fa-solid fa-puzzle-piece mr-1"></i>配對遊戲
+                    </button>
+                    <button onclick="switchTab('results')" id="nav-results" class="px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition hover:bg-white/10">
+                        <i class="fa-solid fa-clipboard-list mr-1"></i>成績紀錄
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容區域 Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- ================= Modal: 學生登入與個人資料填寫 ================= -->
+        <div id="loginModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-md w-full p-6 md:p-8 transform transition-all">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-amber-100 text-amber-800 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-inner">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+                    <h2 class="text-2xl font-black text-slate-800">課堂簽到與互動體驗</h2>
+                    <p class="text-xs text-slate-500 mt-1">請填寫基本資料，完成測驗後成績將儲存至成績表</p>
+                </div>
+
+                <form id="studentForm" onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">學生姓名 <span class="text-red-500">*</span></label>
+                        <input type="text" id="studentName" required placeholder="請輸入姓名 (例如: 賴昱蓁)" 
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">科系班級 <span class="text-red-500">*</span></label>
+                        <input type="text" id="studentDept" required placeholder="請輸入科系班級 (例如: 老服二1)" 
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">學號 <span class="text-red-500">*</span></label>
+                        <input type="text" id="studentId" required placeholder="請輸入學號 (例如: 1411353034)" 
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none text-sm transition">
+                    </div>
+
+                    <button type="submit" class="w-full mt-4 bg-gradient-to-r from-amber-700 to-amber-900 hover:from-amber-800 hover:to-amber-950 text-white font-bold py-3 rounded-xl shadow-lg shadow-amber-800/30 transition duration-200 flex items-center justify-center space-x-2">
+                        <span>開始學習與遊戲測驗</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ================= TAB 1: 知識學習庫 (阿罩霧歷史穿越 4P通路分析 + 社區長照) ================= -->
+        <section id="tab-learn" class="space-y-6">
+            <!-- 企劃案導讀 Banner -->
+            <div class="bg-gradient-to-br from-amber-900 via-stone-800 to-teal-900 text-white p-6 md:p-8 rounded-3xl shadow-lg relative overflow-hidden">
+                <div class="relative z-10 max-w-3xl">
+                    <span class="bg-amber-500/30 border border-amber-400/50 text-amber-200 text-xs font-bold px-3 py-1 rounded-full">
+                        企劃案實務與社區深耕
+                    </span>
+                    <h2 class="text-2xl md:text-3xl font-black mt-3 leading-tight">
+                        霧峰林家花園「阿罩霧歷史穿越」企劃案<br>
+                        <span class="text-amber-400 text-xl font-bold">4P 行銷策略之「通路 (Place)」深層分析</span>
+                    </h2>
+                    <p class="text-xs md:text-sm text-slate-300 mt-3 leading-relaxed">
+                        針對霧峰青年外流、古蹟與商圈斷裂、在地經濟衰退三大痛點，整合實境劇本殺《尋找消失的藏寶圖》、換裝體驗與跨域核銷機制，打造「實體古蹟 + 數位社群 + 在地商圈」三維通路網絡。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 分類選單 -->
+            <div class="flex overflow-x-auto space-x-2 border-b border-slate-200 pb-2">
+                <button onclick="filterResources('all')" class="cat-btn active px-4 py-2 text-sm font-medium rounded-xl bg-amber-700 text-white shadow-sm whitespace-nowrap">全部單元</button>
+                <button onclick="filterResources('pain-point')" class="cat-btn px-4 py-2 text-sm font-medium rounded-xl bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 whitespace-nowrap">三大核心痛點</button>
+                <button onclick="filterResources('physical')" class="cat-btn px-4 py-2 text-sm font-medium rounded-xl bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 whitespace-nowrap">實體空間通路</button>
+                <button onclick="filterResources('digital')" class="cat-btn px-4 py-2 text-sm font-medium rounded-xl bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 whitespace-nowrap">數位社群通路</button>
+                <button onclick="filterResources('ecosystem')" class="cat-btn px-4 py-2 text-sm font-medium rounded-xl bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 whitespace-nowrap">跨域異業通路</button>
+                <button onclick="filterResources('ltc-community')" class="cat-btn px-4 py-2 text-sm font-medium rounded-xl bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 whitespace-nowrap">社區長照與資源</button>
+            </div>
+
+            <!-- 卡片展示網格 -->
+            <div id="resourceGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 由 JS 動態繪製 -->
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: 圖片/圖示與動作配對遊戲 ================= -->
+        <section id="tab-game" class="hidden space-y-6">
+            <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900 text-white p-6 rounded-3xl shadow-lg flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-extrabold flex items-center gap-2">
+                        <i class="fa-solid fa-gamepad text-amber-300"></i> 通路機制與文化動作 - 互動配對測驗
+                    </h2>
+                    <p class="text-xs md:text-sm text-blue-200 mt-1">
+                        請點擊左側「通路場域與機制 (圖示)」，再點擊右側相對應的「文化整合與執行動作」進行正確配對！
+                    </p>
+                </div>
+                <div class="flex items-center space-x-4 bg-white/10 px-4 py-2.5 rounded-2xl backdrop-blur-md border border-white/10">
+                    <div class="text-center">
+                        <div class="text-xs text-blue-200">配對得分</div>
+                        <div id="gameScore" class="text-2xl font-black text-amber-300">0 / 6</div>
+                    </div>
+                    <div class="h-8 w-px bg-blue-300/30"></div>
+                    <div class="text-center">
+                        <div class="text-xs text-blue-200">測驗時間</div>
+                        <div id="gameTimer" class="text-2xl font-mono font-bold text-emerald-300">00:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 配對遊戲舞台 Area -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 左側：機制與場域區 -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                    <h3 class="font-bold text-slate-800 flex items-center text-sm md:text-base border-b pb-2">
+                        <i class="fa-solid fa-map-location-dot text-blue-600 mr-2"></i> 【步驟一】選擇通路機制或實體場域
+                    </h3>
+                    <div id="leftGameCards" class="grid grid-cols-1 gap-3">
+                        <!-- JS 產出 -->
+                    </div>
+                </div>
+
+                <!-- 右側：動作與說明區 -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                    <h3 class="font-bold text-slate-800 flex items-center text-sm md:text-base border-b pb-2">
+                        <i class="fa-solid fa-hand-pointer text-emerald-600 mr-2"></i> 【步驟二】選擇對應文化整合與功能動作
+                    </h3>
+                    <div id="rightGameCards" class="grid grid-cols-1 gap-3">
+                        <!-- JS 產出 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 遊戲完成 Banner -->
+            <div id="gameCompleteBanner" class="hidden bg-emerald-50 border-2 border-emerald-400 p-6 rounded-3xl shadow-xl text-center space-y-4">
+                <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <h3 class="text-2xl font-black text-emerald-900">恭喜！已完成配對測驗！</h3>
+                <p class="text-slate-600 text-sm max-w-lg mx-auto">您的表現極佳，已順利掌握《阿罩霧歷史穿越》4P 通路策略與社區長照機制！</p>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="resetGame()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold transition">
+                        <i class="fa-solid fa-rotate-right mr-1"></i>重新挑戰
+                    </button>
+                    <button onclick="switchTab('results')" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-md transition">
+                        <i class="fa-solid fa-file-invoice mr-1"></i>查看成績紀錄與匯出
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: 學生測試成績資料表 ================= -->
+        <section id="tab-results" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-5">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-800 flex items-center">
+                            <i class="fa-solid fa-table text-teal-600 mr-2.5"></i> 課堂測驗成績紀錄資料表
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">成績紀錄包含時間戳記、學生資訊、分數與費時，可儲存至老師 Google 雲端試算表</p>
+                    </div>
+
+                    <!-- 操作按鈕群 -->
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="exportToCSV()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs md:text-sm font-bold shadow transition flex items-center">
+                            <i class="fa-solid fa-file-excel mr-1.5"></i>匯出 CSV (存至雲端)
+                        </button>
+                        <button onclick="openGoogleDriveModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs md:text-sm font-bold shadow transition flex items-center">
+                            <i class="fa-brands fa-google-drive mr-1.5"></i>同步至老師 Google 雲端
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 成績摘要卡 Summary Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500">測驗學生</div>
+                            <div id="resStudentName" class="font-bold text-slate-800">尚未測驗</div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500">配對得分</div>
+                            <div id="resScore" class="font-bold text-slate-800">0 分</div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500">測驗耗時</div>
+                            <div id="resTime" class="font-bold text-slate-800">00:00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 成績表格 Table -->
+                <div class="overflow-x-auto rounded-2xl border border-slate-200 mt-4">
+                    <table class="w-full text-left text-xs md:text-sm">
+                        <thead class="bg-slate-100 text-slate-700 font-bold border-b">
+                            <tr>
+                                <th class="p-3.5">時間戳記</th>
+                                <th class="p-3.5">科系班級</th>
+                                <th class="p-3.5">學號</th>
+                                <th class="p-3.5">學生姓名</th>
+                                <th class="p-3.5">測驗得分</th>
+                                <th class="p-3.5">花費時間</th>
+                                <th class="p-3.5">狀態</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scoreTableBody" class="divide-y divide-slate-100 text-slate-700">
+                            <tr>
+                                <td colspan="7" class="p-6 text-center text-slate-400">目前尚無測驗紀錄，請點選上方「配對遊戲」開始測驗。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Google 雲端硬碟 Web App 說明 Modal -->
+    <div id="googleDriveModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-100">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-lg text-slate-800 flex items-center">
+                    <i class="fa-brands fa-google-drive text-emerald-600 mr-2"></i>上傳至老師 Google 雲端試算表
+                </h3>
+                <button onclick="closeGoogleDriveModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div class="text-xs text-slate-600 space-y-3 leading-relaxed">
+                <p class="font-bold text-slate-700">【老師 / 管理者 Google 雲端串接步驟】</p>
+                <ol class="list-decimal pl-4 space-y-1 text-slate-500">
+                    <li>建立一份新的 Google 試算表，標題命名為「測驗成績紀錄」。</li>
+                    <li>點選選單「擴充功能」 &gt; 「Apps Script」。</li>
+                    <li>將 Web App 腳本 (doPost) 貼上並部署為「網路應用程式」(存取權限設為: 任何人)。</li>
+                    <li>複製部署獲得的 Web App URL，貼入下方輸入框即可連動！</li>
+                </ol>
+
+                <div class="mt-2">
+                    <label class="block font-bold text-slate-700 mb-1">Google Apps Script Web App URL:</label>
+                    <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec" 
+                        class="w-full px-3 py-2 border border-slate-300 rounded-xl outline-none text-xs focus:ring-2 focus:ring-emerald-500">
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 border-t pt-3">
+                <button onclick="closeGoogleDriveModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold">關閉</button>
+                <button onclick="sendDataToGoogleSheet()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow">
+                    立即送出最新測試成績
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 頁腳 Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-4 text-center mt-10 border-t border-slate-800">
+        <p>霧峰林家花園「阿罩霧歷史穿越」4P 通路行銷與社區長照實務專案網頁</p>
+        <p class="mt-1 text-slate-500">可自由部署於 GitHub Pages 進行教學互動使用</p>
+    </footer>
+
+    <!-- JavaScript 邏輯實作 -->
+    <script>
+        // 1. 企劃案與社區長照知識資料庫
+        const resourceData = [
+            {
+                id: 'p-1',
+                title: '痛點一：年輕族群與學生外流',
+                category: 'pain-point',
+                tag: '專案背景痛點',
+                tagBg: 'bg-rose-100 text-rose-800',
+                icon: 'fa-user-slash',
+                color: 'from-rose-500 to-red-700',
+                details: [
+                    '霧峰高齡化與少子化現象顯著',
+                    '亞洲大學、朝陽科技大學學生生活圈多偏向校園內部與台中市區',
+                    '難以深入在地傳統老街與文化景區'
+                ]
+            },
+            {
+                id: 'p-2',
+                title: '痛點二：古蹟與現代街區斷裂',
+                category: 'pain-point',
+                tag: '專案背景痛點',
+                tagBg: 'bg-rose-100 text-rose-800',
+                icon: 'fa-link-slash',
+                color: 'from-rose-500 to-red-700',
+                details: [
+                    '外地遊客多採取「參觀完即走」的快閃旅遊模式',
+                    '景點與周邊鄰里缺乏連結',
+                    '無法深入走訪巷弄與在地樹仁商圈'
+                ]
+            },
+            {
+                id: 'p-3',
+                title: '痛點三：在地消費經濟衰退',
+                category: 'pain-point',
+                tag: '專案背景痛點',
+                tagBg: 'bg-rose-100 text-rose-800',
+                icon: 'fa-arrow-trend-down',
+                color: 'from-rose-500 to-red-700',
+                details: [
+                    '老街店家仍以傳統民生採買為主',
+                    '缺乏文創風格小店吸引年輕客群',
+                    '景點與商圈缺乏明確吸引力的引導動線'
+                ]
+            },
+            {
+                id: 'phy-1',
+                title: '核心古蹟體驗場域（頂厝、下厝、大花廳）',
+                category: 'physical',
+                tag: '實體空間通路',
+                tagBg: 'bg-amber-100 text-amber-800',
+                icon: 'fa-landmark',
+                color: 'from-amber-600 to-yellow-800',
+                details: [
+                    '宮保第、大花廳、蓉鏡齋歷史建築群',
+                    '實境劇本殺遊戲關卡場域',
+                    '利用大花廳戲台水缸物理聲學設計解謎關卡'
+                ]
+            },
+            {
+                id: 'phy-2',
+                title: '入口「換裝驛站」',
+                category: 'physical',
+                tag: '實體空間通路',
+                tagBg: 'bg-amber-100 text-amber-800',
+                icon: 'fa-shirt',
+                color: 'from-amber-600 to-yellow-800',
+                details: [
+                    '融合清代馬褂旗袍、日治學生袴與經典漢服',
+                    '玩家角色切換前置體驗節點',
+                    '拍照打卡與社群視覺傳播起點'
+                ]
+            },
+            {
+                id: 'phy-3',
+                title: '霧峰老街與樹仁商圈引導動線',
+                category: 'physical',
+                tag: '實體空間通路',
+                tagBg: 'bg-amber-100 text-amber-800',
+                icon: 'fa-map-location-dot',
+                color: 'from-amber-600 to-yellow-800',
+                details: [
+                    '銜接古蹟文化圈與在地常民生活圈',
+                    '尋寶謎題引導遊客走進巷弄商圈',
+                    '打破「參觀即走」快閃模式，打通人流'
+                ]
+            },
+            {
+                id: 'dig-1',
+                title: '社群預約與傳播通路',
+                category: 'digital',
+                tag: '數位社群通路',
+                tagBg: 'bg-blue-100 text-blue-800',
+                icon: 'fa-comments',
+                color: 'from-blue-600 to-indigo-700',
+                details: [
+                    'LINE Bot / IG / Dcard / Threads 整合',
+                    '契合 18–25 歲年輕學生數位習慣',
+                    '降低對傳統導覽「枯燥、門票貴」的抗拒'
+                ]
+            },
+            {
+                id: 'dig-2',
+                title: '雙軌便捷核銷系統',
+                category: 'digital',
+                tag: '數位社群通路',
+                tagBg: 'bg-blue-100 text-blue-800',
+                icon: 'fa-qrcode',
+                color: 'from-blue-600 to-indigo-700',
+                details: [
+                    '線上 LINE Bot + 網頁掃碼雙軌機制',
+                    '動態 QR Code 與 4 位數 PIN 碼核銷',
+                    '控制結帳於 10 秒內完成，降低店家門檻'
+                ]
+            },
+            {
+                id: 'eco-1',
+                title: '在地商家串聯網絡',
+                category: 'ecosystem',
+                tag: '跨域異業通路',
+                tagBg: 'bg-purple-100 text-purple-800',
+                icon: 'fa-store',
+                color: 'from-purple-600 to-purple-900',
+                details: [
+                    '拜訪 15+ 商家，招募 8+ 家深度合作店家',
+                    '在地老店、風格茶飲與手搖飲串联',
+                    '轉化為憑證折抵與實體獎勵兌換據點'
+                ]
+            },
+            {
+                id: 'eco-2',
+                title: '紙本備用通路 (手冊與集章卡)',
+                category: 'ecosystem',
+                tag: '跨域異業通路',
+                tagBg: 'bg-purple-100 text-purple-800',
+                icon: 'fa-book-bookmark',
+                color: 'from-purple-600 to-purple-900',
+                details: [
+                    '針對非智慧型手機使用者備用',
+                    '附帶合作店家折價券導覽手冊',
+                    '撕角與蓋章核銷，確保全齡層覆蓋'
+                ]
+            },
+            {
+                id: 'ltc-1',
+                title: '社區長照 A/B/C 單位與資源',
+                category: 'ltc-community',
+                tag: '社區長照資源',
+                tagBg: 'bg-teal-100 text-teal-800',
+                icon: 'fa-hand-holding-medical',
+                color: 'from-teal-600 to-emerald-800',
+                details: [
+                    'A單位：健民長照中心、本堂澄清護理之家',
+                    'B單位：霧峰綜合長照、立安居家長照',
+                    'C據點：林蘭生基金會、丁台社區發展協會',
+                    '家托與非長照：伊甸基金會、霧峰區公所'
+                ]
+            }
+        ];
+
+        // 2. 配對遊戲資料對 (Pairs Data)
+        const gamePairsData = [
+            {
+                id: 1,
+                name: '入口「換裝驛站」',
+                sub: '前置體驗與視覺節點',
+                icon: 'fa-shirt',
+                color: 'text-amber-700 border-amber-200 bg-amber-50',
+                actionText: '提供馬褂旗袍與日治袴裝，進行沉浸式歷史角色體驗與社群打卡'
+            },
+            {
+                id: 2,
+                name: '宮保第與大花廳戲台',
+                sub: '核心古蹟實境關卡',
+                icon: 'fa-landmark',
+                color: 'text-amber-700 border-amber-200 bg-amber-50',
+                actionText: '利用大花廳戲台水缸物理聲學智慧，設計尋寶與謎題解答關卡'
+            },
+            {
+                id: 3,
+                name: '霧峰老街與樹仁商圈',
+                sub: '景點商圈引導動線',
+                icon: 'fa-map-location-dot',
+                color: 'text-emerald-700 border-emerald-200 bg-emerald-50',
+                actionText: '遊戲任務延伸至周邊巷弄，打破「參觀即走」快閃模式並帶動人流'
+            },
+            {
+                id: 4,
+                name: '雙軌便捷核銷系統',
+                sub: 'LINE Bot / 網頁掃碼',
+                icon: 'fa-qrcode',
+                color: 'text-blue-700 border-blue-200 bg-blue-50',
+                actionText: '運用動態 QR Code 與 4 位數 PIN 碼，控制店家結帳折抵於 10 秒內完成'
+            },
+            {
+                id: 5,
+                name: '在地商家合作聯盟',
+                sub: '跨域異業經濟通路',
+                icon: 'fa-store',
+                color: 'text-purple-700 border-purple-200 bg-purple-50',
+                actionText: '串聯 8 家以上在地老店與風格茶飲，成為遊戲獎勵兌換與消費折抵據點'
+            },
+            {
+                id: 6,
+                name: '紙本導覽手冊與集章卡',
+                sub: '全齡備用體驗通路',
+                icon: 'fa-book-bookmark',
+                color: 'text-slate-700 border-slate-200 bg-slate-100',
+                actionText: '提供撕角與蓋章核銷機制，確保無手機或訊號不良遊客皆可參與體驗'
+            }
+        ];
+
+        // 全域狀態 State
+        let currentStudent = null;
+        let selectedLeftId = null;
+        let selectedRightId = null;
+        let matchedCount = 0;
+        let timerInterval = null;
+        let secondsElapsed = 0;
+        let gameScore = 0;
+        let testRecords = [];
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            renderResources('all');
+            const savedStudent = localStorage.getItem('ltc_student');
+            if (savedStudent) {
+                currentStudent = JSON.parse(savedStudent);
+                updateUserHeader();
+                document.getElementById('loginModal').classList.add('hidden');
+            }
+            initGame();
+        });
+
+        // 登入處理
+        function handleLogin(e) {
+            e.preventDefault();
+            const name = document.getElementById('studentName').value.trim();
+            const dept = document.getElementById('studentDept').value.trim();
+            const id = document.getElementById('studentId').value.trim();
+
+            if (!name || !dept || !id) return;
+
+            currentStudent = { name, dept, id };
+            localStorage.setItem('ltc_student', JSON.stringify(currentStudent));
+            updateUserHeader();
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+
+        function updateUserHeader() {
+            if (currentStudent) {
+                document.getElementById('userInfoHeader').classList.remove('hidden');
+                document.getElementById('userHeaderName').innerText = currentStudent.name;
+                document.getElementById('userHeaderDept').innerText = `(${currentStudent.dept})`;
+            }
+        }
+
+        // 頁籤切換
+        function switchTab(tabName) {
+            ['learn', 'game', 'results'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`nav-${t}`);
+                btn.classList.remove('bg-amber-600', 'text-white', 'shadow-sm');
+                btn.classList.add('hover:bg-white/10');
+            });
+
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabName}`);
+            activeBtn.classList.add('bg-amber-600', 'text-white', 'shadow-sm');
+
+            if (tabName === 'game' && !timerInterval && matchedCount < gamePairsData.length) {
+                startTimer();
+            }
+        }
+
+        // 繪製知識卡片
+        function renderResources(category) {
+            const grid = document.getElementById('resourceGrid');
+            grid.innerHTML = '';
+
+            const filtered = category === 'all' 
+                ? resourceData 
+                : resourceData.filter(r => r.category === category);
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition flex flex-col justify-between';
+                
+                let detailsList = item.details.map(d => `<li class="flex items-start"><i class="fa-solid fa-check text-amber-600 mr-2 mt-1 text-xs"></i><span>${d}</span></li>`).join('');
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs px-2.5 py-1 rounded-full font-bold ${item.tagBg}">${item.tag}</span>
+                        </div>
+                        <div class="flex items-center space-x-3 mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br ${item.color} text-white flex items-center justify-center font-bold text-lg shadow">
+                                <i class="fa-solid ${item.icon}"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-base leading-snug">${item.title}</h3>
+                        </div>
+                        <ul class="text-xs text-slate-600 space-y-1.5 mt-2 border-t pt-3 border-slate-100">
+                            ${detailsList}
+                        </ul>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterResources(cat) {
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-amber-700', 'text-white');
+                btn.classList.add('bg-white', 'text-slate-600');
+            });
+            event.target.classList.remove('bg-white', 'text-slate-600');
+            event.target.classList.add('bg-amber-700', 'text-white');
+            renderResources(cat);
+        }
+
+        // ================= 3. 配對遊戲邏輯 =================
+        function initGame() {
+            matchedCount = 0;
+            gameScore = 0;
+            selectedLeftId = null;
+            selectedRightId = null;
+            document.getElementById('gameScore').innerText = `0 / ${gamePairsData.length}`;
+            document.getElementById('gameCompleteBanner').classList.add('hidden');
+
+            const leftItems = [...gamePairsData].sort(() => Math.random() - 0.5);
+            const rightItems = [...gamePairsData].sort(() => Math.random() - 0.5);
+
+            const leftContainer = document.getElementById('leftGameCards');
+            const rightContainer = document.getElementById('rightGameCards');
+
+            leftContainer.innerHTML = '';
+            rightContainer.innerHTML = '';
+
+            leftItems.forEach(item => {
+                const el = document.createElement('div');
+                el.className = `matching-card p-4 rounded-xl border-2 cursor-pointer ${item.color} flex items-center space-x-3`;
+                el.dataset.id = item.id;
+                el.onclick = () => selectLeft(item.id, el);
+                el.innerHTML = `
+                    <div class="w-10 h-10 rounded-lg bg-white/80 flex items-center justify-center text-lg shadow-sm">
+                        <i class="fa-solid ${item.icon}"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-sm">${item.name}</div>
+                        <div class="text-xs opacity-75">${item.sub}</div>
+                    </div>
+                `;
+                leftContainer.appendChild(el);
+            });
+
+            rightItems.forEach(item => {
+                const el = document.createElement('div');
+                el.className = `matching-card p-4 rounded-xl border-2 border-slate-200 bg-slate-50 hover:bg-slate-100 cursor-pointer text-slate-700 flex items-center space-x-3`;
+                el.dataset.id = item.id;
+                el.onclick = () => selectRight(item.id, el);
+                el.innerHTML = `
+                    <div class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-600 font-bold shrink-0">
+                        ?
+                    </div>
+                    <div class="text-xs md:text-sm font-medium leading-relaxed">
+                        ${item.actionText}
+                    </div>
+                `;
+                rightContainer.appendChild(el);
+            });
+
+            resetTimer();
+        }
+
+        function selectLeft(id, el) {
+            if (el.classList.contains('matched')) return;
+            document.querySelectorAll('#leftGameCards .matching-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedLeftId = id;
+            checkPair();
+        }
+
+        function selectRight(id, el) {
+            if (el.classList.contains('matched')) return;
+            document.querySelectorAll('#rightGameCards .matching-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedRightId = id;
+            checkPair();
+        }
+
+        function checkPair() {
+            if (selectedLeftId !== null && selectedRightId !== null) {
+                const leftCard = document.querySelector(`#leftGameCards .matching-card[data-id="${selectedLeftId}"]`);
+                const rightCard = document.querySelector(`#rightGameCards .matching-card[data-id="${selectedRightId}"]`);
+
+                if (selectedLeftId === selectedRightId) {
+                    leftCard.classList.remove('selected');
+                    leftCard.classList.add('matched');
+                    rightCard.classList.remove('selected');
+                    rightCard.classList.add('matched');
+
+                    matchedCount++;
+                    gameScore += Math.round(100 / gamePairsData.length);
+                    document.getElementById('gameScore').innerText = `${matchedCount} / ${gamePairsData.length}`;
+
+                    selectedLeftId = null;
+                    selectedRightId = null;
+
+                    if (matchedCount === gamePairsData.length) {
+                        finishGame();
+                    }
+                } else {
+                    leftCard.classList.add('wrong');
+                    rightCard.classList.add('wrong');
+
+                    setTimeout(() => {
+                        leftCard.classList.remove('wrong', 'selected');
+                        rightCard.classList.remove('wrong', 'selected');
+                        selectedLeftId = null;
+                        selectedRightId = null;
+                    }, 400);
+                }
+            }
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+                const secs = String(secondsElapsed % 60).padStart(2, '0');
+                document.getElementById('gameTimer').innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function resetTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+            secondsElapsed = 0;
+            document.getElementById('gameTimer').innerText = '00:00';
+        }
+
+        function finishGame() {
+            if (timerInterval) clearInterval(timerInterval);
+            const timeFormatted = document.getElementById('gameTimer').innerText;
+            
+            document.getElementById('gameCompleteBanner').classList.remove('hidden');
+            
+            const now = new Date().toLocaleString('zh-TW');
+            const record = {
+                timestamp: now,
+                dept: currentStudent ? currentStudent.dept : '未填寫',
+                id: currentStudent ? currentStudent.id : '無',
+                name: currentStudent ? currentStudent.name : '匿名學生',
+                score: 100,
+                time: timeFormatted,
+                status: '配對成功 (滿分)'
+            };
+
+            testRecords.unshift(record);
+            updateResultTable();
+        }
+
+        function resetGame() {
+            initGame();
+            startTimer();
+        }
+
+        // 4. 成績表格渲染
+        function updateResultTable() {
+            if (testRecords.length > 0) {
+                const latest = testRecords[0];
+                document.getElementById('resStudentName').innerText = `${latest.name} (${latest.dept})`;
+                document.getElementById('resScore').innerText = `${latest.score} 分`;
+                document.getElementById('resTime').innerText = latest.time;
+            }
+
+            const tbody = document.getElementById('scoreTableBody');
+            tbody.innerHTML = '';
+
+            testRecords.forEach(rec => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition';
+                tr.innerHTML = `
+                    <td class="p-3.5 font-mono text-slate-500">${rec.timestamp}</td>
+                    <td class="p-3.5 font-medium">${rec.dept}</td>
+                    <td class="p-3.5 font-mono">${rec.id}</td>
+                    <td class="p-3.5 font-bold text-slate-800">${rec.name}</td>
+                    <td class="p-3.5"><span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 font-bold rounded-lg text-xs">${rec.score} 分</span></td>
+                    <td class="p-3.5 font-mono">${rec.time}</td>
+                    <td class="p-3.5 text-slate-600">${rec.status}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 5. 匯出 CSV 檔
+        function exportToCSV() {
+            if (testRecords.length === 0) {
+                alert('目前尚無測試成績紀錄可以匯出！');
+                return;
+            }
+
+            let csvContent = "\uFEFF時間戳記,科系班級,學號,學生姓名,測驗分數,花費時間,狀態\n";
+            testRecords.forEach(r => {
+                csvContent += `"${r.timestamp}","${r.dept}","${r.id}","${r.name}","${r.score}","${r.time}","${r.status}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `阿罩霧與長照測驗成績表_${currentStudent ? currentStudent.name : '學生'}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 6. Google Sheet 傳送彈窗與觸發
+        function openGoogleDriveModal() {
+            document.getElementById('googleDriveModal').classList.remove('hidden');
+        }
+
+        function closeGoogleDriveModal() {
+            document.getElementById('googleDriveModal').classList.add('hidden');
+        }
+
+        function sendDataToGoogleSheet() {
+            const url = document.getElementById('scriptUrlInput').value.trim();
+            if (!url) {
+                alert('請先填寫 Google Apps Script 部署之 Web App 網址！');
+                return;
+            }
+
+            if (testRecords.length === 0) {
+                alert('請先完成一次配對遊戲測驗再上傳！');
+                return;
+            }
+
+            const latestRecord = testRecords[0];
+
+            fetch(url, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(latestRecord)
+            }).then(() => {
+                alert('成績紀錄已成功傳送至老師的 Google 雲端試算表！');
+                closeGoogleDriveModal();
+            }).catch(err => {
+                alert('連線上傳失敗：' + err.message);
+            });
+        }
+    </script>
+</body>
+</html>
